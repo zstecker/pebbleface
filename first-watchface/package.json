@@ -23,6 +23,7 @@
     ],
     "resources": {
       "media": []
-    }
+    },
+    "capabilities": [ "health" ]
   }
 }
