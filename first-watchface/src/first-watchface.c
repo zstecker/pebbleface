@@ -1,10 +1,37 @@
 #include <pebble.h>
+#include "first-watchface.h"
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_date_layer;
 static TextLayer *s_steps_layer;
+
+ClaySettings settings;
+
+static void init_default_settings() {
+  settings.BackgroundColor = GColorMintGreen;
+  settings.SecondaryColor = GColorOxfordBlue;
+  settings.ShowSteps = true;
+}
+
+static void load_settings() {
+  init_default_settings();
+  persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+static void save_settings() {
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+  update_display();
+}
+
+static void update_display() {
+  window_set_background_color(s_main_window, settings.BackgroundColor);
+
+  layer_set_hidden((Layer *) s_steps_layer, !settings.ShowSteps);
+
+  layer_mark_dirty(s_canvas_layer);
+}
 
 static void update_time() {
   // Get a tm structure
@@ -13,11 +40,14 @@ static void update_time() {
 
   // Write the current hours and minutes into a buffer
   static char s_buffer[8];
-  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
-                                          "%H:%M" : "%l:%M", tick_time);
 
-  // Display this time on the TextLayer
-  text_layer_set_text(s_time_layer, s_buffer);
+  if (clock_is_24h_style()) {
+    strftime(s_buffer, sizeof(s_buffer), "%H:%M", tick_time);
+    text_layer_set_text(s_time_layer, s_buffer);
+  } else {
+    strftime(s_buffer, sizeof(s_buffer), "%I:%M", tick_time);
+    text_layer_set_text(s_time_layer, s_buffer + (('0' == s_buffer[0])?1:0));
+  }
 }
 
 static void update_date() {
@@ -70,11 +100,21 @@ static void health_handler(HealthEventType event, void *context) {
 }
 
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
-  GRect rect_bounds = GRect(60, 110, 60, 25);
-  graphics_context_set_fill_color(ctx, GColorDarkCandyAppleRed);
-
+  int rect_width = text_layer_get_content_size(s_date_layer).w + 10;
+  GRect rect_bounds = GRect(((180 - rect_width) / 2), 110, rect_width, 25);
+  graphics_context_set_fill_color(ctx, settings.SecondaryColor);
   int corner_radius = 5;
   graphics_fill_rect(ctx, rect_bounds, corner_radius, GCornersAll);
+
+  GPoint circle_center = GPoint(90, 90);
+  uint16_t circle_radius = 75;
+  graphics_context_set_stroke_color(ctx, settings.SecondaryColor);
+  graphics_context_set_stroke_width(ctx, 1);
+  graphics_draw_circle(ctx, circle_center, circle_radius);
+
+  graphics_context_set_stroke_width(ctx, 3);
+  uint16_t outer_circle_radius = 80;
+  graphics_draw_circle(ctx, circle_center, outer_circle_radius);
 }
 
 static void main_window_load(Window *window) {
@@ -117,6 +157,8 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_steps_layer, GTextAlignmentCenter);
 
   layer_add_child(window_layer, text_layer_get_layer(s_steps_layer));
+
+  update_display();
 }
 
 static void main_window_unload(Window *window) {
@@ -126,8 +168,33 @@ static void main_window_unload(Window *window) {
   layer_destroy(s_canvas_layer);
 }
 
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  // Background Color
+  Tuple *bg_color_t = dict_find(iter, MESSAGE_KEY_BackgroundColor);
+  if (bg_color_t) {
+    settings.BackgroundColor = GColorFromHEX(bg_color_t->value->int32);
+  }
+
+  // Background Color
+  Tuple *sg_color_t = dict_find(iter, MESSAGE_KEY_SecondaryColor);
+  if (sg_color_t) {
+    settings.SecondaryColor = GColorFromHEX(sg_color_t->value->int32);
+  }
+
+  Tuple *steps = dict_find(iter, MESSAGE_KEY_ShowSteps);
+  if (steps) {
+    settings.ShowSteps = steps->value->int32 == 1;
+  }
+
+  save_settings();
+}
 
 static void init() {
+  load_settings();
+
+  app_message_register_inbox_received(inbox_received_handler);
+  app_message_open(128, 128);
+
   // Create main Window element and assign to pointer
   s_main_window = window_create();
 
@@ -136,8 +203,6 @@ static void init() {
     .load = main_window_load,
     .unload = main_window_unload
   });
-
-  window_set_background_color(s_main_window, GColorSunsetOrange);
 
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);

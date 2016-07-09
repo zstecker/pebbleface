@@ -2,28 +2,35 @@
   "name": "first-watchface",
   "author": "Zachary Stecker",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.2"
+  },
   "pebble": {
-    "displayName": "My Watchface",
+    "displayName": "Shalem",
     "uuid": "d39bf00d-a436-4cf8-a3fe-ee8633256c1a",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
-      "aplite",
-      "basalt",
       "chalk"
     ],
     "watchapp": {
       "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "BackgroundColor",
+      "SecondaryColor",
+      "ShowSteps"
     ],
     "resources": {
       "media": []
     },
-    "capabilities": [ "health" ]
+    "capabilities": [
+      "health",
+      "configurable"
+    ]
   }
 }
