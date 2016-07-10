@@ -1,5 +1,5 @@
 #include <pebble.h>
-#include "first-watchface.h"
+#include "main.h"
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
