@@ -8,20 +8,41 @@
     "items": [
       {
         "type": "heading",
-        "defaultValue": "Colors"
+        "defaultValue": "Theme Colors"
       },
       {
         "type": "color",
         "messageKey": "BackgroundColor",
         "defaultValue": "0xAAFFAA",
-        "label": "Background Color"
+        "label": "Background color"
       },
       {
         "type": "color",
         "messageKey": "SecondaryColor",
         "defaultValue": "0x000055",
-        "label": "Secondary Color",
-        "description": "Color for the date background and outer rings"
+        "label": "Secondary color",
+        "description": "Choose a color for the date background and the rings around the edge"
+      }
+    ]
+  },
+  {
+    "type":"section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "Text Colors"
+      },
+      {
+        "type":"color",
+        "messageKey": "ClockTextColor",
+        "defaultValue": "0x000000",
+        "label": "Clock text color"
+      },
+      {
+        "type":"color",
+        "messageKey": "DateTextColor",
+        "defaultValue": "0xFFFFFF",
+        "label": "Date text color"
       }
     ]
   },
@@ -37,6 +58,12 @@
         "messageKey": "ShowSteps",
         "defaultValue": true,
         "label": "Show step count"
+      },
+      {
+        "type":"color",
+        "messageKey": "StepsTextColor",
+        "defaultValue": "0x000000",
+        "label": "Steps text color"
       }
     ]
   },

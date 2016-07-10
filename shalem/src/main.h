@@ -6,6 +6,9 @@
 typedef struct ClaySettings {
   GColor BackgroundColor;
   GColor SecondaryColor;
+  GColor ClockTextColor;
+  GColor DateTextColor;
+  GColor StepsTextColor;
   bool ShowSteps;
 } __attribute__((__packed__)) ClaySettings;
 

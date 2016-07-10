@@ -22,6 +22,9 @@
     },
     "messageKeys": [
       "BackgroundColor",
+      "ClockTextColor",
+      "DateTextColor",
+      "StepsTextColor",
       "SecondaryColor",
       "ShowSteps"
     ],
